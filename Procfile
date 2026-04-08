@@ -1,0 +1,1 @@
+web: ./gradlew bootJar && java -jar build/libs/*.jar
