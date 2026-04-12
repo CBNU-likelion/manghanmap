@@ -14,7 +14,7 @@ public class VibeService {
     private final VibeRepository vibeRepository;
 
     public List<Vibe> getVibes(Long universityId) {
-        return vibeRepository.findByUniversityIdOrderByCreatedAtAsc(universityId);
+        return vibeRepository.findByUniversityIdOrderByCreatedAtDesc(universityId);
     }
 
     public Vibe save(University university, String text) {

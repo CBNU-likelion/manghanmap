@@ -1,6 +1,7 @@
 package com.yeontteo.manghanmap.manghanmap.controller;
 
 import com.yeontteo.manghanmap.manghanmap.domain.University;
+import com.yeontteo.manghanmap.manghanmap.repository.UniversityRepository;
 import com.yeontteo.manghanmap.manghanmap.service.ContributionService;
 import com.yeontteo.manghanmap.manghanmap.service.UniversityService;
 import lombok.RequiredArgsConstructor;
@@ -15,20 +16,37 @@ public class ContributionController {
 
     private final UniversityService universityService;
     private final ContributionService contributionService;
+    private final UniversityRepository universityRepository;
 
     @PostMapping("/{id}/contribute")
     public ResponseEntity<Map<String, Object>> contribute(
             @PathVariable Long id,
             @RequestBody Map<String, Object> body) {
+        return saveContribution(id, body);
+    }
 
-        University university = universityService.getById(id);
+    @PostMapping("/contribute")
+    public ResponseEntity<Map<String, Object>> contributeLegacy(
+            @RequestBody Map<String, Object> body) {
+        Long universityId = ((Number) body.get("universityId")).longValue();
+        return saveContribution(universityId, body);
+    }
 
-        int progress      = (int) body.get("progress");
+    private ResponseEntity<Map<String, Object>> saveContribution(Long universityId, Map<String, Object> body) {
+        University university = universityService.getById(universityId);
+
+        int progress      = ((Number) body.get("progress")).intValue();
         double sleepHours = ((Number) body.get("sleepHours")).doubleValue();
         boolean isCrammer = (boolean) body.get("isCrammer");
-        int examFear      = (int) body.get("examFear");
+        int examFear      = ((Number) body.get("examFear")).intValue();
+        Object moodValue = body.get("currentMood");
+        String currentMood = moodValue instanceof String ? ((String) moodValue).trim() : "";
 
         contributionService.save(university, progress, sleepHours, isCrammer, examFear);
+        if (!currentMood.isEmpty()) {
+            university.setCurrentMood(currentMood);
+            universityRepository.save(university);
+        }
         Map<String, Object> updatedStats = contributionService.getStats(university);
 
         return ResponseEntity.status(201).body(Map.of(

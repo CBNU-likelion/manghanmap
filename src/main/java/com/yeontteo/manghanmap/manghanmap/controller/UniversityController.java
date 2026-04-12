@@ -1,5 +1,6 @@
 package com.yeontteo.manghanmap.manghanmap.controller;
 
+import com.yeontteo.manghanmap.manghanmap.dto.UniversityResponse;
 import com.yeontteo.manghanmap.manghanmap.domain.University;
 import com.yeontteo.manghanmap.manghanmap.service.ContributionService;
 import com.yeontteo.manghanmap.manghanmap.service.UniversityService;
@@ -18,15 +19,20 @@ public class UniversityController {
     private final ContributionService contributionService;
 
     @GetMapping
-    public ResponseEntity<List<University>> getUniversities(
+    public ResponseEntity<List<UniversityResponse>> getUniversities(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String province) {
-        return ResponseEntity.ok(universityService.search(q, province));
+        return ResponseEntity.ok(
+                universityService.search(q, province)
+                        .stream()
+                        .map(universityService::toResponse)
+                        .toList()
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<University> getUniversity(@PathVariable Long id) {
-        return ResponseEntity.ok(universityService.getById(id));
+    public ResponseEntity<UniversityResponse> getUniversity(@PathVariable Long id) {
+        return ResponseEntity.ok(universityService.toResponse(universityService.getById(id)));
     }
 
     @GetMapping("/{id}/stats")
